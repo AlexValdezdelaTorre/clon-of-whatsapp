@@ -37,7 +37,7 @@ export class Users extends BaseEntity {
 	cellphone: string;
 
 	@Column('varchar', {
-		nullable: false,
+		nullable: true,
 		length: 255,
 	})
 	password: string;

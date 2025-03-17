@@ -3,9 +3,10 @@ import { DataSource } from 'typeorm';
 
 // Importa el objeto `envs` que contiene las variables de entorno necesarias para la conexión a la base de datos.
 import { envs } from '../../config/envs';
+import { Chats, Contacts, Users } from '../../data';
 
 // Importa el modelo `Users`, que define la estructura de la tabla de usuarios en la base de datos.
-import { Users } from './models/users.model';
+
 
 // Define una interfaz `Options` que especifica la forma de las opciones necesarias para conectar con la base de datos.
 interface Options {
@@ -35,7 +36,7 @@ export const AppDataSource = new DataSource({
 	username: options.username, // El nombre de usuario para acceder a la base de datos.
 	password: options.password, // La contraseña para acceder a la base de datos.
 	database: options.database, // El nombre de la base de datos a la que se conecta.
-	entities: [Users], // Define los modelos que se usarán con TypeORM (en este caso, el modelo `Users`).
+	entities: [Users, Contacts, Chats], // Define los modelos que se usarán con TypeORM (en este caso, el modelo `Users`).
 	synchronize: true, // Sincroniza automáticamente el esquema de la base de datos con las entidades del modelo.
 	migrationsRun: true, // Si está habilitado, ejecuta las migraciones automáticamente al iniciar la aplicación.
 	migrations: [__dirname + '/migrations/*.ts'], // Especifica las rutas de las migraciones que se ejecutarán.

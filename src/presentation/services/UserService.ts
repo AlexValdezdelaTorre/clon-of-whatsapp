@@ -4,6 +4,10 @@
 import { CreateUsersDTO } from '../../domain/dtos/users/create.users.dto';
 import { Users } from '../../data/postgres/models/users.model';
 import { CustomError } from '../../domain';
+import { LoginUserDTO } from '../../domain/dtos/users/loginUser.dto';
+import { encriptAdapter } from '../../config/bcryptAdapter';
+import { JwtAdapter } from '../../config/jwt.adapter';
+
 
 // Define la clase `UserService`, que maneja la lógica de negocio relacionada con los usuarios.
 export class UserService {
@@ -21,6 +25,10 @@ export class UserService {
         users.email = usersData.email;
         users.cellphone = usersData.cellphone;
         users.password = usersData.password;
+
+        users.password = encriptAdapter.hash(usersData.password);
+
+        
 
         try {
             // Intenta guardar el usuario en la base de datos.
@@ -53,36 +61,44 @@ export class UserService {
             throw CustomError.internalServed("Error creando el usuario");
         }
     }
+
+    
+  async loginUser(loginUserDto: LoginUserDTO) {
+    const user = await this.findUserByEmail(loginUserDto.email, /*Status.ACTIVE*/)
+     
+    const isMatching = encriptAdapter.compare(
+      loginUserDto.password,
+      user.password
+    );
+        
+    if(!isMatching) throw CustomError.unAuthorized('Invalid Credentials');
+    
+    const token = await JwtAdapter.generateToken({id: user.id});
+    if(!token) throw CustomError.internalServed("Error while creating JWT")
+      return {
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          surname: user.surname,
+          email: user.email,
+          cellphone: user.cellphone,
+          
+        }
+        
+      };
+  };
+
+  
+  async findUserByEmail(email: string, /*status: Status*/){
+    const user = await Users.findOne({
+      where: {
+       email: email,
+       //status: Status.ACTIVE
+      }
+    });
+    if(!user) throw CustomError.notFound(`User with email: ${email} not found`);
+    
+    return user;
+  };
 }
-		// static async loginUser(email: string, password: string): Promise<any> {
-		// 	try {
-		// 		const userRepository = AppDataSource.getRepository(User);
-		// 		const user = await userRepository.findOne({ where: { email } });
-		// 		const email = await userRepository.findOne({ where: { user } });
-
-		// 		if (!user) {
-		// 			throw new Error('Usuario no encontrado');
-		// 		}
-
-		// 		if (!email) {
-		// 			throw new Error('Correcto invalido');
-		// 		}
-
-		// 		const isMatch = await bcrypt.compare(password, user.password);
-		// 		if (!isMatch) {
-		// 			throw new Error('Contraseña incorrecta');
-		// 		}
-
-		// 		const token = jwt.sign(
-		// 			{ id: user.id, email: user.email },
-		// 			`llave-secreta`,
-		// 			{ expiresIn: '1h' },
-		// 		);
-
-		// 		return { message: 'Inicio de sesion exitoso', token };
-		// 	} catch (error: any) {
-		// 		throw new Error(error.message);
-		// 	}
-		// }
-	
-

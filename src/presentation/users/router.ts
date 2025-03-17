@@ -17,6 +17,7 @@ export class UserRoutes {
 
         // Define una ruta POST para registrar un nuevo usuario, asociando esta ruta con el método `createUser` del controlador.
         router.post('/register', usersController.createUser);
+        router.post('/login', usersController.loginUser);
 
         // Retorna el objeto Router con la configuración de la ruta
         return router;

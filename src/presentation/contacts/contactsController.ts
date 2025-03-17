@@ -1,17 +1,12 @@
-// Importa los tipos Request y Response de Express para manejar las solicitudes y respuestas HTTP.
-// Importa CreateUsersDTO y CustomError desde el dominio para gestionar los datos del usuario y los errores personalizados.
-// Importa el servicio UserService que contiene la lógica de negocio para manejar los usuarios.
-import { Request, Response } from 'express';
-import { CreateUsersDTO, CustomError } from '../../domain';
-import { UserService } from '../services/UserService';
-import { LoginUserDTO } from '../../domain/dtos/users/loginUser.dto';
+import { Request, Response } from "express";
+import { CreateContactsDTO, CustomError } from "../../domain";
+import { ContactsService } from "../services/contactsService";
 
-// Define la clase UserController que actúa como un controlador para gestionar las rutas de usuarios.
-export class UserController {
+export class ContactsController {
 
     // El constructor de la clase recibe una instancia del servicio `UserService` que se utilizará para interactuar
     // con la lógica de negocio para crear usuarios.
-    constructor(private readonly userService: UserService) {}
+    constructor(private readonly contactsService: ContactsService) {}
 
     // Función privada para manejar los errores. Recibe el error y la respuesta HTTP.
     // Si el error es una instancia de `CustomError`, devuelve un mensaje de error con el código de estado específico.
@@ -29,33 +24,20 @@ export class UserController {
 
     // Método `createUser` para manejar la creación de un nuevo usuario.
     // Este método recibe la solicitud `req` y la respuesta `res` como parámetros.
-    createUser = (req: Request, res: Response) => {
+    createContact = (req: Request, res: Response) => {
         // Llama a `CreateUsersDTO.create` para validar y crear una instancia de DTO con los datos del cuerpo de la solicitud.
         // Si los datos son incorrectos, se devuelve un error 422 con el mensaje correspondiente.
-        const [error, createUsersDto] = CreateUsersDTO.create(req.body);
+        const [error, createUsersDto] = CreateContactsDTO.create(req.body);
 
         if (error) return res.status(422).json({ message: error });
 
         // Si los datos son válidos, llama al método `createUser` del `UserService` para crear el usuario.
         // En caso de éxito, responde con el código de estado 201 (Creado) y los datos del nuevo usuario.
-        this.userService.createUser(createUsersDto!)
+        this.contactsService.createContact(createUsersDto!)
             .then((data: any) => 
                 res.status(201).json(data)
             )
             // Si ocurre un error, se maneja mediante la función `handleError`.
             .catch((error: unknown) => this.handleError(error, res))
     };
-
-    
-    loginUser = ( req: Request, res: Response) => {
-        const [error, loginUserDto] = LoginUserDTO.create(req.body)
-        
-        if(error) return res.status(422).json({ message: error});
-
-        this.userService.loginUser(loginUserDto!)
-          .then((data: any) => 
-          res.status(201).json(data))
-          .catch((error: unknown) => this.handleError(error, res))  
-    };
-
 }
