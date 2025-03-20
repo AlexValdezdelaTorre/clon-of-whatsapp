@@ -2,9 +2,10 @@
 // Importa CreateUsersDTO y CustomError desde el dominio para gestionar los datos del usuario y los errores personalizados.
 // Importa el servicio UserService que contiene la lógica de negocio para manejar los usuarios.
 import { Request, Response } from 'express';
-import { CreateUsersDTO, CustomError } from '../../domain';
+import { CreateUsersDTO, CustomError, LoginUserDTO, UpdateUsersDTO } from '../../domain';
 import { UserService } from '../services/UserService';
-import { LoginUserDTO } from '../../domain/dtos/users/loginUser.dto';
+
+
 
 // Define la clase UserController que actúa como un controlador para gestionar las rutas de usuarios.
 export class UserController {
@@ -39,11 +40,11 @@ export class UserController {
         // Si los datos son válidos, llama al método `createUser` del `UserService` para crear el usuario.
         // En caso de éxito, responde con el código de estado 201 (Creado) y los datos del nuevo usuario.
         this.userService.createUser(createUsersDto!)
-            .then((data: any) => 
-                res.status(201).json(data)
-            )
+        .then((data: any) => 
+            res.status(201).json(data)
+        )
             // Si ocurre un error, se maneja mediante la función `handleError`.
-            .catch((error: unknown) => this.handleError(error, res))
+        .catch((error: unknown) => this.handleError(error, res))
     };
 
     
@@ -53,9 +54,37 @@ export class UserController {
         if(error) return res.status(422).json({ message: error});
 
         this.userService.loginUser(loginUserDto!)
-          .then((data: any) => 
-          res.status(201).json(data))
-          .catch((error: unknown) => this.handleError(error, res))  
+        .then((data: any) => 
+        res.status(201).json(data))
+        .catch((error: unknown) => this.handleError(error, res))  
     };
+
+    handleUpdateUser = (req: Request, res: Response) => {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ message: "ID del usuario es requerido" });
+        }
+        const [ error, updateUsersDTO] = UpdateUsersDTO.create(req.body);
+    
+        if(error) return res.status(422).json({ message: error});
+        
+        this.userService.updateUser(id, updateUsersDTO!)
+        .then((data: any) => {
+            return res.status(200).json(data)
+        })
+         .catch((error: unknown) => this.handleError(error,res))  
+    };
+
+    deleteUser = (req: Request, res: Response) => {
+        const { id } = req.params;
+    
+        this.userService.deleteUser(id)
+        .then((data: any) => {
+            return res.status(200).json(data)
+        })
+        .catch((error: unknown) => this.handleError(error,res)) 
+    }; 
+
 
 }

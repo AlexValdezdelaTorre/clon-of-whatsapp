@@ -1,5 +1,8 @@
 // Define la clase `CreateUsersDTO`, que se utiliza para representar un objeto de transferencia de datos (DTO)
 // para la creación de un nuevo usuario. Los DTOs son objetos que se usan para transferir datos entre las capas
+
+import { regularExp } from "../../../config/regular-exp";
+
 // de la aplicación, especialmente en la comunicación entre el frontend y el backend.
 export class CreateUsersDTO {
 	// El constructor de la clase acepta 5 parámetros: `name`, `surname`, `email`, `cellphone`, `password`.
@@ -25,10 +28,10 @@ export class CreateUsersDTO {
 		if (!surname) return ['Missing surname'];   // Si falta el apellido, se retorna un error.
 		if (!email) return ['Missing email'];       // Si falta el correo electrónico, se retorna un error.
 		// Aquí se podrían agregar validaciones más estrictas, como verificar si el correo es válido con una expresión regular.
-		// if(!regularExp.email.test(email)) return ['Invalid email'];
+		 if(!regularExp.email.test(email)) return ['Invalid email'];
 		if (!cellphone) return ['Missing cellphone']; // Si falta el número de teléfono, se retorna un error.
 		// Similarmente, se pueden agregar validaciones más estrictas para el teléfono y la contraseña.
-		// if(!regularExp.password.test(password)) return ['The password must be at least 10 characters, and contain at least one uppercase letter, one lowercase and one especial character']
+		 if(!regularExp.password.test(password)) return ['The password must be at least 10 characters, and contain at least one uppercase letter, one lowercase and one especial character']
 		if (!password) return ['Missing password'];  // Si falta la contraseña, se retorna un error.
 
 		// Si todos los campos son válidos, se retorna `undefined` (sin errores) y se crea una nueva instancia

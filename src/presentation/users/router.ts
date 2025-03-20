@@ -1,7 +1,9 @@
 // Importa las clases necesarias desde Express y los servicios y controladores de la aplicación.
 import { Router } from "express"; // Router de Express para definir las rutas del servidor
-import { UserService } from "../services/UserService"; // Servicio que maneja la lógica de negocio relacionada con los usuarios
+ // Servicio que maneja la lógica de negocio relacionada con los usuarios
 import { UserController } from "./usersController"; // Controlador que gestiona las solicitudes HTTP y las responde
+import { UserService } from "../services/UserService";
+
 
 // Define una clase UserRoutes para gestionar las rutas relacionadas con los usuarios.
 export class UserRoutes {
@@ -18,6 +20,8 @@ export class UserRoutes {
         // Define una ruta POST para registrar un nuevo usuario, asociando esta ruta con el método `createUser` del controlador.
         router.post('/register', usersController.createUser);
         router.post('/login', usersController.loginUser);
+        router.patch('/:id', usersController.handleUpdateUser);
+        router.delete('/:id', usersController.deleteUser);
 
         // Retorna el objeto Router con la configuración de la ruta
         return router;

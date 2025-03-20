@@ -1,8 +1,6 @@
 import { Contacts } from "../../data";
 import { CreateContactsDTO, CustomError } from "../../domain";
-
-
-
+import { UpdateContactsDTO } from "../../domain/dtos/contacts/updateContacts.dto";
 
 export class ContactsService {
 
@@ -50,5 +48,58 @@ export class ContactsService {
             // ocurrió un problema al crear el usuario.
             throw CustomError.internalServed("Error creando el usuario");
         }
-    }
+    };
+
+    async findContact(id: string){
+        const result = await Contacts.createQueryBuilder("contacts")
+             
+        .where("contacts.id = :id", { id: id})
+        //.andWhere("user.status = :status", {status: true})
+        .getOne();
+    
+        if(!result) {
+          throw CustomError.notFound("Contact not found");
+        }
+      
+        return result;
+                
+    };
+
+    async updateContact(id: string, contactsData: UpdateContactsDTO ){
+        const contact = await this.findContact(id);
+      
+        contact.email = contactsData.email.toLowerCase().trim()
+        contact.cellphone = contactsData.cellphone.trim()
+      
+        try {
+           const dbContact = await contact.save();
+             
+           return {
+             email: dbContact.email,
+             cellphone: dbContact.cellphone
+           };
+         } catch (error) {
+           throw CustomError.internalServed("Error actualizando el usuario")
+         }
+    };
+
+    async removeContact(Id: string) {
+		try {
+			const contact = await Contacts.findOne({
+				where: { id: Id},
+			});
+
+			if (!contact) {
+				throw CustomError.notFound('Contact not found');
+			}
+
+			// Elimina el contacto
+			await contact.remove();
+
+			return { message: 'Contact removed successfully' };
+		} catch (error) {
+			throw CustomError.internalServed('Error removing the contact');
+		}
+	}; 
+
 }

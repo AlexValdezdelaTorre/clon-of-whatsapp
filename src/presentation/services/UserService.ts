@@ -1,12 +1,12 @@
 // Importa la clase CreateUsersDTO, que representa los datos de entrada para crear un usuario.
 // Importa la clase Users, que es el modelo de datos para los usuarios en la base de datos (PostgreSQL).
 // Importa la clase CustomError, que se utiliza para manejar errores personalizados con códigos de estado HTTP.
-import { CreateUsersDTO } from '../../domain/dtos/users/create.users.dto';
-import { Users } from '../../data/postgres/models/users.model';
-import { CustomError } from '../../domain';
-import { LoginUserDTO } from '../../domain/dtos/users/loginUser.dto';
-import { encriptAdapter } from '../../config/bcryptAdapter';
-import { JwtAdapter } from '../../config/jwt.adapter';
+
+import { Status, Users } from '../../data/postgres/models/users.model';
+import { encriptAdapter, JwtAdapter } from '../../config';
+import { CreateUsersDTO, CustomError, LoginUserDTO, UpdateUsersDTO } from '../../domain';
+
+
 
 
 // Define la clase `UserService`, que maneja la lógica de negocio relacionada con los usuarios.
@@ -60,7 +60,7 @@ export class UserService {
             // ocurrió un problema al crear el usuario.
             throw CustomError.internalServed("Error creando el usuario");
         }
-    }
+  };
 
     
   async loginUser(loginUserDto: LoginUserDTO) {
@@ -94,11 +94,62 @@ export class UserService {
     const user = await Users.findOne({
       where: {
        email: email,
-       //status: Status.ACTIVE
       }
     });
     if(!user) throw CustomError.notFound(`User with email: ${email} not found`);
     
     return user;
   };
+
+  async findIdUser(id: string){
+    const result = await Users.createQueryBuilder("user")
+         
+    .where("user.id = :id", { id: id})
+    .getOne();
+
+    if(!result) {
+      throw CustomError.notFound("User not found");
+    }
+  
+    return result;
+            
+  };
+
+
+
+  async updateUser(id: string, usersData: UpdateUsersDTO ){
+  const user = await this.findIdUser(id);
+
+   user.email = usersData.email.toLowerCase().trim()
+   user.cellphone = usersData.cellphone.trim()
+
+   try {
+     const dbUser = await user.save();
+       
+     return {
+       email: dbUser.email,
+       cellphone: dbUser.cellphone
+     };
+   } catch (error) {
+     throw CustomError.internalServed("Error actualizando el usuario")
+   }
+  };
+
+  async deleteUser(id: string){
+  const userId = await this.findIdUser(id);
+
+  userId.status = Status.DELETED
+
+    try {
+      userId.save()
+
+      return {
+      id: userId.id,
+      status: userId.status
+    }
+    } catch (error) {
+    throw CustomError.internalServed("Error eliminando el usuario")
+    }
+ };
+
 }

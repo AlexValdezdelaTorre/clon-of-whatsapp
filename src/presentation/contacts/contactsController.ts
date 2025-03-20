@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { CreateContactsDTO, CustomError } from "../../domain";
 import { ContactsService } from "../services/contactsService";
+import { UpdateContactsDTO } from "../../domain/dtos/contacts/updateContacts.dto";
 
 export class ContactsController {
 
@@ -40,4 +41,33 @@ export class ContactsController {
             // Si ocurre un error, se maneja mediante la función `handleError`.
             .catch((error: unknown) => this.handleError(error, res))
     };
+
+    handleUpdateContact = (req: Request, res: Response) => {
+        const { id } = req.params;
+            //const sessionUserId = req.body.sessionUser.id;
+            //const sessionUserId = (req as unknown as { user: { id: string } }).user.id;
+    
+        if (!id) {
+            return res.status(400).json({ message: "ID del usuario es requerido" });
+        }
+        const [ error, updateContacts] = UpdateContactsDTO.create(req.body);
+        
+        if(error) return res.status(422).json({ message: error});
+            
+        this.contactsService.updateContact(id, updateContacts!)
+        .then((data: any) => {
+                return res.status(200).json(data)
+        })
+        .catch((error: unknown) => this.handleError(error,res))  
+    };
+
+    deleContact = (req: Request, res: Response) => {
+        const { id } = req.params;
+               
+        this.contactsService.removeContact(id)
+        .then((data: any) => {
+                return res.status(200).json(data)
+        })
+        .catch((error: unknown) => this.handleError(error,res)) 
+    }; 
 }
